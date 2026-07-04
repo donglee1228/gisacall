@@ -319,18 +319,37 @@
   function 처음으로(){
     보이기('화면_성별');
   }
-  // ===== 격일제 근무자 판정 (로컬 날짜 기준·자정 전환·무한 교대) =====
-  // 기준: 2026-07-05 = 김종대 근무 / 2026-07-06 = 이기동 근무 / 이후 하루 단위 교대
+  // ===== 근무 예외표: 격일제와 다르게 지정할 날짜만 여기에 추가하세요 =====
+  // ★ 특정 날 근무자를 바꾸려면 아래 한 줄만 고치면 됩니다(모든 폰에 동일 반영).
+  //   'YYYY-MM-DD'(한국날짜) : 'kim'(김종대) 또는 'lee'(이기동)
+  var 예외근무 = {
+    // 예) '2026-07-10': 'kim',   // 이기동 쉬는 날이라 김종대가 대신 근무
+  };
+
+  // ===== 한국시간(KST, UTC+9) 기준 오늘 날짜 (기기 시간대와 무관) =====
+  function kst날짜(){
+    var now = new Date();
+    var utc = now.getTime() + now.getTimezoneOffset() * 60000; // 기기 로컬 → UTC
+    var k = new Date(utc + 9 * 3600000);                       // UTC → KST
+    var y = k.getFullYear(), m = k.getMonth(), d = k.getDate();
+    var s = y + '-' + String(m+1).padStart(2,'0') + '-' + String(d).padStart(2,'0');
+    return { y:y, m:m, d:d, s:s, dateObj:new Date(y, m, d) };
+  }
+
+  // ===== 오늘 근무자 판정 (KST 기준·예외표 우선·격일제 무한 교대) =====
+  // 격일제 기준: 2026-07-05 = 김종대. 이후 하루 단위로 교대. KST 자정 00:00에 전환.
   function 오늘근무자(){
-    var base = new Date(2026, 6, 5);            // 2026-07-05 (이 날 김종대)
-    var n = new Date();
-    var d0 = new Date(base.getFullYear(), base.getMonth(), base.getDate());
-    var d1 = new Date(n.getFullYear(), n.getMonth(), n.getDate());
-    var diff = Math.round((d1 - d0) / 86400000);
-    var 김종대근무 = ((((diff % 2) + 2) % 2) === 0);  // 기준일과 짝수 차 = 김종대
-    return 김종대근무
-      ? { key:'김종대', name:'김종대 기사', tel:'01033835808' }
-      : { key:'이기동', name:'이기동 기사(뚱땡이)', tel:'01038059275' };
+    var k = kst날짜();
+    var who;
+    if (예외근무[k.s]) {                 // ① 예외표에 그 날짜가 있으면 최우선
+      who = 예외근무[k.s];
+    } else {                             // ② 없으면 격일제 계산(KST 날짜 diff)
+      var diff = Math.round((k.dateObj - new Date(2026, 6, 5)) / 86400000);
+      who = ((((diff % 2) + 2) % 2) === 0) ? 'kim' : 'lee';  // 기준일과 짝수 차 = 김종대
+    }
+    return who === 'kim'
+      ? { key:'kim', name:'김종대 기사', tel:'01033835808' }
+      : { key:'lee', name:'이기동 기사(뚱땡이)', tel:'01038059275' };
   }
   // ===== 전화 카드 아래 (일하는중)/(안하는중) 상태 자동 표시 =====
   function 상태갱신(){
@@ -338,7 +357,7 @@
     var 이 = document.getElementById('상태_이기동');
     var 김 = document.getElementById('상태_김종대');
     if (!이 || !김) return;
-    var 이근무 = (근무.key === '이기동');
+    var 이근무 = (근무.key === 'lee');
     이.textContent = 이근무 ? '(일하는중)' : '(안하는중)';
     김.textContent = 이근무 ? '(안하는중)' : '(일하는중)';
     이.className = 'status ' + (이근무 ? 'on' : 'off');
