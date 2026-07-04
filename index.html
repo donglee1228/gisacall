@@ -124,6 +124,32 @@
     color:#1c1f26;font-weight:800;font-size:16px;letter-spacing:.05em;
     padding:14px 34px;cursor:pointer;
   }
+  /* 어르신용 큼직한 종료 버튼 */
+  .exitBtn{
+    display:block;width:100%;max-width:360px;margin:22px auto 0;
+    border:2px solid rgba(192,57,47,.7);border-radius:20px;
+    background:linear-gradient(160deg,#c0392f 0%,#8f2f38 100%);
+    color:#fff;font-weight:900;font-size:30px;letter-spacing:.04em;
+    padding:32px 20px;cursor:pointer;
+    box-shadow:0 10px 26px rgba(0,0,0,.5), inset 0 1px 0 rgba(255,255,255,.12);
+    transition:transform .08s ease;
+  }
+  .exitBtn:active{transform:scale(.98);}
+  /* 종료 안내 폴백 오버레이 */
+  .goodbye{
+    position:fixed;inset:0;z-index:80;
+    display:none;align-items:center;justify-content:center;text-align:center;
+    padding:28px;background:#0b0c10;
+  }
+  .goodbye.show{display:flex;}
+  .goodbye .gbInner{max-width:520px;}
+  .goodbye .gbIco{font-size:70px;line-height:1;margin-bottom:16px;}
+  .goodbye h2{
+    margin:0;color:var(--gold2);font-weight:900;line-height:1.5;
+    font-size:clamp(30px,8vw,46px);letter-spacing:.02em;
+    text-shadow:0 3px 14px rgba(0,0,0,.7);
+  }
+  .goodbye p{margin:18px 0 0;color:#cfd3dc;font-size:clamp(20px,5vw,28px);font-weight:700;line-height:1.5;}
 </style>
 
 <div class="wrap">
@@ -159,6 +185,16 @@
     <div class="cart">15카트 ↑</div>
     <div class="thanks">감사합니다 오늘 빨리가겠습니다!</div>
     <button class="closeBtn" onclick="알림닫기()">확인</button>
+    <button class="exitBtn" onclick="앱종료()">종료하기</button>
+  </div>
+</div>
+
+<!-- 종료 안내 폴백 오버레이 -->
+<div id="종료안내" class="goodbye">
+  <div class="gbInner">
+    <div class="gbIco">👋</div>
+    <h2>앱을 종료했습니다.<br>창을 닫아주세요.</h2>
+    <p>오늘도 안전운행 하세요, 기사님!</p>
   </div>
 </div>
 
@@ -181,5 +217,14 @@
   function 알림닫기(e){
     if (e && e.target && e.target.id !== '알림' && !e.target.classList.contains('closeBtn')) return;
     document.getElementById('알림').classList.remove('show');
+  }
+  function 앱종료(){
+    // 1) 스크립트로 연 창이면 닫기 시도
+    try { window.open('', '_self'); window.close(); } catch(e){}
+    try { window.close(); } catch(e){}
+    // 2) 안 닫히면(대부분의 브라우저) 폴백: 큰 안내 오버레이 표시
+    setTimeout(function(){
+      document.getElementById('종료안내').classList.add('show');
+    }, 250);
   }
 </script>
