@@ -198,23 +198,13 @@
   .telBtn:active{transform:scale(.98);}
   .telBtn .ico{font-size:22px;line-height:1;}
 
-  /* 사장님 설정 안내 (접이식·최소화, 기사에게 방해 안 되게) */
-  .bossInfo{
-    position:fixed;left:0;right:0;bottom:0;z-index:5;
-    padding:6px 12px calc(6px + env(safe-area-inset-bottom));
-    font-size:11px;color:#5a5f6c;text-align:center;
-  }
-  .bossInfo summary{cursor:pointer;list-style:none;color:#6b7180;opacity:.7;}
-  .bossInfo summary::-webkit-details-marker{display:none;}
-  .bossInfo[open] summary{opacity:1;color:var(--gold);}
-  .bossBox{
-    max-width:440px;margin:8px auto 0;text-align:left;
-    background:var(--card);border:1px solid rgba(201,162,39,.3);border-radius:12px;
-    padding:12px 14px;color:var(--text);font-size:12.5px;line-height:1.7;
-  }
-  .bossBox b{color:var(--gold2);}
-  .bossBox code{background:#12141a;color:#e6be3f;padding:2px 6px;border-radius:6px;
-    font-size:12px;word-break:break-all;user-select:all;}
+  /* 오늘 전화 대상 표시 (알림 안) */
+  .calling{margin:4px 0 2px;font-size:15px;font-weight:800;color:var(--gold2);min-height:18px;
+    text-shadow:0 2px 8px rgba(0,0,0,.5);}
+  /* 격일제 근무 상태 (전화 카드 번호 밑) */
+  .status{font-size:14px;font-weight:800;margin:4px 0 2px;letter-spacing:.02em;}
+  .status.on{color:#3fbf6a;text-shadow:0 0 10px rgba(63,191,106,.35);}
+  .status.off{color:#6b7180;opacity:.85;}
 
   /* 히어로 이미지 (성별 선택 화면 상단) */
   .hero{display:flex;flex-direction:column;align-items:center;gap:10px;margin-bottom:6px;}
@@ -281,39 +271,31 @@
     <div class="siren">🚨</div>
     <h2>물량 폭주!</h2>
     <div class="cart">15카트 ↑</div>
+    <div class="calling" id="전화중"></div>
     <div class="thanks">감사합니다 오늘 빨리가겠습니다!</div>
     <button class="closeBtn" onclick="알림닫기()">확인</button>
     <button class="exitBtn" onclick="앱종료()">종료하기</button>
 
-    <!-- 기사 전화하기 목록 -->
+    <!-- 기사 전화하기 목록 (오늘 근무 상태 자동 표시) -->
     <div class="callList">
       <div class="listTitle">📞 기사님께 전화하기</div>
       <div class="driverRow">
         <div class="driverCard">
           <div class="name">이기동 기사<br>(뚱땡이)</div>
           <div class="num">010-3805-9275</div>
+          <div class="status" id="상태_이기동">&nbsp;</div>
           <a class="telBtn" href="tel:01038059275"><span class="ico">📞</span>전화</a>
         </div>
         <div class="driverCard">
           <div class="name">김종대 기사</div>
           <div class="num">010-3383-5808</div>
+          <div class="status" id="상태_김종대">&nbsp;</div>
           <a class="telBtn" href="tel:01033835808"><span class="ico">📞</span>전화</a>
         </div>
       </div>
     </div>
   </div>
 </div>
-
-<!-- 사장님 설정 안내 (접이식·기본 접힘) -->
-<details class="bossInfo">
-  <summary>⚙ 사장님 설정 안내</summary>
-  <div class="bossBox">
-    사장님 폰에만 딱 한 번 설정하면 됩니다 (기사님은 설정 필요 없음):<br>
-    <b>1.</b> 폰에 <b>ntfy</b> 앱 설치 (Play스토어 / 앱스토어)<br>
-    <b>2.</b> 앱에서 토픽 구독: <code>gisacall-donglee-kd15cart-7f3k9x</code><br>
-    <b>3.</b> 끝! 기사님이 버튼 누르면 사장님 폰으로 알림이 옵니다.
-  </div>
-</details>
 
 <!-- 종료 안내 폴백 오버레이 -->
 <div id="종료안내" class="goodbye">
@@ -325,8 +307,6 @@
 </div>
 
 <script>
-  // ntfy.sh 푸시 토픽(사장님 폰이 구독). 백엔드 없이 정적 페이지에서 동작.
-  var NTFY_TOPIC = "gisacall-donglee-kd15cart-7f3k9x";
   var 선택성별 = "";
   function 보이기(id){
     document.querySelectorAll('.screen').forEach(function(s){s.classList.remove('active');});
@@ -339,22 +319,52 @@
   function 처음으로(){
     보이기('화면_성별');
   }
-  // 사장님 폰으로 푸시 전송(앱 안 켜도 옴). 실패해도 화면 흐름은 그대로 진행.
-  function 푸시전송(){
+  // ===== 격일제 근무자 판정 (로컬 날짜 기준·자정 전환·무한 교대) =====
+  // 기준: 2026-07-05 = 김종대 근무 / 2026-07-06 = 이기동 근무 / 이후 하루 단위 교대
+  function 오늘근무자(){
+    var base = new Date(2026, 6, 5);            // 2026-07-05 (이 날 김종대)
+    var n = new Date();
+    var d0 = new Date(base.getFullYear(), base.getMonth(), base.getDate());
+    var d1 = new Date(n.getFullYear(), n.getMonth(), n.getDate());
+    var diff = Math.round((d1 - d0) / 86400000);
+    var 김종대근무 = ((((diff % 2) + 2) % 2) === 0);  // 기준일과 짝수 차 = 김종대
+    return 김종대근무
+      ? { key:'김종대', name:'김종대 기사', tel:'01033835808' }
+      : { key:'이기동', name:'이기동 기사(뚱땡이)', tel:'01038059275' };
+  }
+  // ===== 전화 카드 아래 (일하는중)/(안하는중) 상태 자동 표시 =====
+  function 상태갱신(){
+    var 근무 = 오늘근무자();
+    var 이 = document.getElementById('상태_이기동');
+    var 김 = document.getElementById('상태_김종대');
+    if (!이 || !김) return;
+    var 이근무 = (근무.key === '이기동');
+    이.textContent = 이근무 ? '(일하는중)' : '(안하는중)';
+    김.textContent = 이근무 ? '(안하는중)' : '(일하는중)';
+    이.className = 'status ' + (이근무 ? 'on' : 'off');
+    김.className = 'status ' + (이근무 ? 'off' : 'on');
+  }
+  // 오늘 근무자에게 전화 걸기 (tel: 다이얼러 — 검색창 이동 문제 없음)
+  function 근무자전화(){
+    var 근무 = 오늘근무자();
+    var 표시 = document.getElementById('전화중');
+    if (표시) 표시.textContent = '📞 ' + 근무.name + '님께 전화 거는 중…';
     try {
-      var body = "🚚 " + (선택성별 ? 선택성별 + " " : "") + "기사님 오늘 물량 15카트 넘어요! (기사콜)";
-      fetch("https://ntfy.sh/" + NTFY_TOPIC, {
-        method: "POST",
-        headers: { "Title": "GisaCall", "Priority": "urgent", "Tags": "truck" },
-        body: body
-      }).then(function(){ console.log("[기사콜] ntfy 푸시 전송 성공:", body); })
-        .catch(function(e){ console.log("[기사콜] ntfy 푸시 전송 실패(오프라인 등):", e); });
-    } catch(e) { console.log("[기사콜] ntfy 예외:", e); }
+      var a = document.createElement('a');
+      a.href = 'tel:' + 근무.tel;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+    } catch(e) {
+      location.href = 'tel:' + 근무.tel;
+    }
+    console.log('[기사콜] 오늘 근무자 전화:', 근무.name, 근무.tel);
   }
   function 물량알림(){
-    푸시전송();                      // ① 사장님 폰으로 푸시(위에 얹기만, 아래 화면 흐름은 그대로)
+    상태갱신();
+    근무자전화();                    // ① 오늘 근무 중인 기사에게 tel: 전화
     var a = document.getElementById('알림');
-    a.classList.add('show');
+    a.classList.add('show');         // ② 기존 알림 오버레이/감사멘트 유지
     if (navigator.vibrate) { try { navigator.vibrate([120,60,120]); } catch(e){} }
   }
   function 알림닫기(e){
@@ -375,6 +385,13 @@
       document.getElementById('종료안내').classList.add('show');
     }, 300);
   }
+  // 격일제 상태 자동 전환: 최초 + 60초마다 + 다시 포커스 시 재계산(자정 넘김·앱 상시 켜둠 대비)
+  상태갱신();
+  setInterval(상태갱신, 60000);
+  document.addEventListener('visibilitychange', function(){
+    if (!document.hidden) 상태갱신();
+  });
+
   // 서비스워커 등록: 설치형 PWA 요건 충족 → 홈 화면 추가 시 주소창 없는 전체화면
   if ('serviceWorker' in navigator) {
     window.addEventListener('load', function(){
