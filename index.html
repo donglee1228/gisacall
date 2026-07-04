@@ -2,6 +2,15 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#1c1f26">
 <title>기사콜</title>
+<!-- PWA: 홈 화면에 추가하면 주소창 없이 전체화면 앱처럼 실행 -->
+<link rel="manifest" href="앱설정.webmanifest">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="기사콜">
+<link rel="apple-touch-icon" href="아이콘_180.png">
+<link rel="icon" type="image/png" sizes="192x192" href="아이콘_192.png">
+<link rel="icon" type="image/png" sizes="512x512" href="아이콘_512.png">
 <style>
   :root{
     --bg:#1c1f26;
@@ -32,7 +41,7 @@
   /* 미세 노이즈 텍스처 */
   body::before{
     content:"";
-    position:fixed;inset:0;pointer-events:none;z-index:0;opacity:.05;
+    position:fixed;inset:0;pointer-events:none;z-index:0;opacity:.07;
     background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='140' height='140'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
   }
   .wrap{
@@ -40,7 +49,7 @@
     min-height:100dvh;
     display:flex;flex-direction:column;
     align-items:center;justify-content:center;
-    padding:24px 20px calc(24px + env(safe-area-inset-bottom));
+    padding:calc(24px + env(safe-area-inset-top)) calc(20px + env(safe-area-inset-right)) calc(24px + env(safe-area-inset-bottom)) calc(20px + env(safe-area-inset-left));
     gap:18px;
   }
   .screen{width:100%;max-width:440px;display:none;flex-direction:column;gap:16px;}
