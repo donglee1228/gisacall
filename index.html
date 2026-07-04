@@ -3,14 +3,16 @@
 <meta name="theme-color" content="#1c1f26">
 <title>기사콜</title>
 <!-- PWA: 홈 화면에 추가하면 주소창 없이 전체화면 앱처럼 실행 -->
-<link rel="manifest" href="앱설정.webmanifest">
+<link rel="manifest" href="앱설정.webmanifest?v=3">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="기사콜">
-<link rel="apple-touch-icon" href="아이콘_180.png">
-<link rel="icon" type="image/png" sizes="192x192" href="아이콘_192.png">
-<link rel="icon" type="image/png" sizes="512x512" href="아이콘_512.png">
+<link rel="apple-touch-icon" href="icon-180.png?v=3">
+<link rel="apple-touch-icon" sizes="180x180" href="icon-180.png?v=3">
+<link rel="icon" type="image/png" sizes="192x192" href="icon-192.png?v=3">
+<link rel="icon" type="image/png" sizes="512x512" href="icon-512.png?v=3">
+<link rel="shortcut icon" type="image/png" href="icon-192.png?v=3">
 <style>
   :root{
     --bg:#1c1f26;
@@ -86,7 +88,7 @@
     background:linear-gradient(160deg,#2a2f3d 0%,#20242f 100%);
     color:var(--text);
     font-size:24px;font-weight:800;line-height:1.4;letter-spacing:.02em;
-    padding:34px 20px;
+    padding:24px 20px;
     cursor:pointer;
     box-shadow:0 10px 26px rgba(0,0,0,.4), inset 0 1px 0 rgba(255,255,255,.06);
     transition:transform .08s ease;
@@ -98,33 +100,37 @@
     text-decoration:underline;cursor:pointer;padding:6px;
   }
 
-  /* 알림 오버레이 */
+  /* 알림 오버레이 (세로 스크롤 가능 · 절대 잘리지 않게) */
   .alert{
     position:fixed;inset:0;z-index:50;
-    display:none;align-items:center;justify-content:center;
-    padding:24px;
+    display:none;
     background:radial-gradient(circle at 50% 40%, rgba(143,47,56,.55), rgba(0,0,0,.9));
     backdrop-filter:blur(2px);
+    overflow-y:auto;-webkit-overflow-scrolling:touch;
   }
-  .alert.show{display:flex;animation:pop .3s ease;}
+  .alert.show{display:block;animation:pop .3s ease;}
   @keyframes pop{from{opacity:0;}to{opacity:1;}}
   .alertCard{
-    text-align:center;max-width:420px;
+    text-align:center;max-width:420px;width:100%;
+    margin:0 auto;
+    min-height:100dvh;
+    display:flex;flex-direction:column;justify-content:center;
+    padding:calc(16px + env(safe-area-inset-top)) 20px calc(20px + env(safe-area-inset-bottom));
   }
   .siren{
-    font-size:72px;line-height:1;margin-bottom:10px;
+    font-size:38px;line-height:1;margin-bottom:4px;
     animation:shake .5s ease infinite;
   }
   @keyframes shake{0%,100%{transform:rotate(-8deg) scale(1);}50%{transform:rotate(8deg) scale(1.12);}}
   .alertCard h2{
-    margin:0 0 6px;font-size:38px;font-weight:900;letter-spacing:.02em;
+    margin:0 0 2px;font-size:24px;font-weight:900;letter-spacing:.02em;
     color:var(--gold2);text-shadow:0 3px 14px rgba(0,0,0,.7);
     animation:pulse 1s ease infinite;
   }
   @keyframes pulse{0%,100%{transform:scale(1);}50%{transform:scale(1.06);}}
-  .alertCard .cart{font-size:60px;font-weight:900;color:var(--red2);margin:6px 0;}
+  .alertCard .cart{font-size:34px;font-weight:900;color:var(--red2);margin:2px 0;}
   .thanks{
-    margin:14px 0 24px;font-size:24px;font-weight:800;color:#fff;line-height:1.4;
+    margin:8px 0 12px;font-size:18px;font-weight:800;color:#fff;line-height:1.35;
     text-shadow:0 2px 10px rgba(0,0,0,.6);
   }
   .closeBtn{
@@ -133,13 +139,13 @@
     color:#1c1f26;font-weight:800;font-size:16px;letter-spacing:.05em;
     padding:14px 34px;cursor:pointer;
   }
-  /* 어르신용 큼직한 종료 버튼 */
+  /* 어르신용 큼직한 종료 버튼 (터치영역 유지·세로만 축소) */
   .exitBtn{
-    display:block;width:100%;max-width:360px;margin:22px auto 0;
-    border:2px solid rgba(192,57,47,.7);border-radius:20px;
+    display:block;width:100%;max-width:360px;margin:12px auto 0;
+    border:2px solid rgba(192,57,47,.7);border-radius:16px;
     background:linear-gradient(160deg,#c0392f 0%,#8f2f38 100%);
-    color:#fff;font-weight:900;font-size:30px;letter-spacing:.04em;
-    padding:32px 20px;cursor:pointer;
+    color:#fff;font-weight:900;font-size:24px;letter-spacing:.04em;
+    padding:18px 20px;cursor:pointer;
     box-shadow:0 10px 26px rgba(0,0,0,.5), inset 0 1px 0 rgba(255,255,255,.12);
     transition:transform .08s ease;
   }
@@ -162,9 +168,9 @@
 
   /* 기사 전화하기 목록 */
   .callList{
-    margin:26px auto 0;max-width:420px;width:100%;
-    border-top:1px solid rgba(255,255,255,.12);padding-top:20px;
-    display:flex;flex-direction:column;gap:16px;
+    margin:16px auto 0;max-width:420px;width:100%;
+    border-top:1px solid rgba(255,255,255,.12);padding-top:14px;
+    display:flex;flex-direction:column;gap:10px;
   }
   .callList .listTitle{color:var(--gold2);font-size:20px;font-weight:800;letter-spacing:.03em;}
   /* 두 기사 카드 좌우 나란히 */
