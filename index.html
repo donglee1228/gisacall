@@ -198,6 +198,24 @@
   .telBtn:active{transform:scale(.98);}
   .telBtn .ico{font-size:22px;line-height:1;}
 
+  /* 사장님 설정 안내 (접이식·최소화, 기사에게 방해 안 되게) */
+  .bossInfo{
+    position:fixed;left:0;right:0;bottom:0;z-index:5;
+    padding:6px 12px calc(6px + env(safe-area-inset-bottom));
+    font-size:11px;color:#5a5f6c;text-align:center;
+  }
+  .bossInfo summary{cursor:pointer;list-style:none;color:#6b7180;opacity:.7;}
+  .bossInfo summary::-webkit-details-marker{display:none;}
+  .bossInfo[open] summary{opacity:1;color:var(--gold);}
+  .bossBox{
+    max-width:440px;margin:8px auto 0;text-align:left;
+    background:var(--card);border:1px solid rgba(201,162,39,.3);border-radius:12px;
+    padding:12px 14px;color:var(--text);font-size:12.5px;line-height:1.7;
+  }
+  .bossBox b{color:var(--gold2);}
+  .bossBox code{background:#12141a;color:#e6be3f;padding:2px 6px;border-radius:6px;
+    font-size:12px;word-break:break-all;user-select:all;}
+
   /* 히어로 이미지 (성별 선택 화면 상단) */
   .hero{display:flex;flex-direction:column;align-items:center;gap:10px;margin-bottom:6px;}
   .heroArt{width:min(78vw,300px);height:auto;display:block;filter:drop-shadow(0 10px 24px rgba(0,0,0,.5));}
@@ -237,11 +255,11 @@
       <div class="heroTitle">기사콜</div>
     </div>
     <div class="genderRow">
-      <button class="btn man" onclick="성별선택()">
+      <button class="btn man" onclick="성별선택('남')">
         <span class="ico">♂</span>
         <span>저는 남자 입니다</span>
       </button>
-      <button class="btn woman" onclick="성별선택()">
+      <button class="btn woman" onclick="성별선택('여')">
         <span class="ico">♀</span>
         <span>저는 여자입니다</span>
       </button>
@@ -286,6 +304,17 @@
   </div>
 </div>
 
+<!-- 사장님 설정 안내 (접이식·기본 접힘) -->
+<details class="bossInfo">
+  <summary>⚙ 사장님 설정 안내</summary>
+  <div class="bossBox">
+    사장님 폰에만 딱 한 번 설정하면 됩니다 (기사님은 설정 필요 없음):<br>
+    <b>1.</b> 폰에 <b>ntfy</b> 앱 설치 (Play스토어 / 앱스토어)<br>
+    <b>2.</b> 앱에서 토픽 구독: <code>gisacall-donglee-kd15cart-7f3k9x</code><br>
+    <b>3.</b> 끝! 기사님이 버튼 누르면 사장님 폰으로 알림이 옵니다.
+  </div>
+</details>
+
 <!-- 종료 안내 폴백 오버레이 -->
 <div id="종료안내" class="goodbye">
   <div class="gbInner">
@@ -296,17 +325,34 @@
 </div>
 
 <script>
+  // ntfy.sh 푸시 토픽(사장님 폰이 구독). 백엔드 없이 정적 페이지에서 동작.
+  var NTFY_TOPIC = "gisacall-donglee-kd15cart-7f3k9x";
+  var 선택성별 = "";
   function 보이기(id){
     document.querySelectorAll('.screen').forEach(function(s){s.classList.remove('active');});
     document.getElementById(id).classList.add('active');
   }
-  function 성별선택(){
+  function 성별선택(g){
+    선택성별 = g || "";
     보이기('화면_물량');
   }
   function 처음으로(){
     보이기('화면_성별');
   }
+  // 사장님 폰으로 푸시 전송(앱 안 켜도 옴). 실패해도 화면 흐름은 그대로 진행.
+  function 푸시전송(){
+    try {
+      var body = "🚚 " + (선택성별 ? 선택성별 + " " : "") + "기사님 오늘 물량 15카트 넘어요! (기사콜)";
+      fetch("https://ntfy.sh/" + NTFY_TOPIC, {
+        method: "POST",
+        headers: { "Title": "GisaCall", "Priority": "urgent", "Tags": "truck" },
+        body: body
+      }).then(function(){ console.log("[기사콜] ntfy 푸시 전송 성공:", body); })
+        .catch(function(e){ console.log("[기사콜] ntfy 푸시 전송 실패(오프라인 등):", e); });
+    } catch(e) { console.log("[기사콜] ntfy 예외:", e); }
+  }
   function 물량알림(){
+    푸시전송();                      // ① 사장님 폰으로 푸시(위에 얹기만, 아래 화면 흐름은 그대로)
     var a = document.getElementById('알림');
     a.classList.add('show');
     if (navigator.vibrate) { try { navigator.vibrate([120,60,120]); } catch(e){} }
