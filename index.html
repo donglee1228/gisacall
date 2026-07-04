@@ -1,18 +1,20 @@
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
 <meta name="theme-color" content="#1c1f26">
 <title>기사콜</title>
-<!-- PWA: 홈 화면에 추가하면 주소창 없이 전체화면 앱처럼 실행 -->
-<link rel="manifest" href="앱설정.webmanifest?v=3">
+<!-- PWA: "홈 화면에 추가" 후 그 아이콘으로 실행하면 주소창 없이 전체화면 앱처럼 실행됨 -->
+<!-- 아이콘 경로는 iOS 호환을 위해 쿼리스트링 없는 순수 ASCII 파일명 사용(캐시 무력화는 서비스워커 버전+새 파일 URL로 처리) -->
+<link rel="manifest" href="앱설정.webmanifest">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="기사콜">
-<link rel="apple-touch-icon" href="icon-180.png?v=3">
-<link rel="apple-touch-icon" sizes="180x180" href="icon-180.png?v=3">
-<link rel="icon" type="image/png" sizes="192x192" href="icon-192.png?v=3">
-<link rel="icon" type="image/png" sizes="512x512" href="icon-512.png?v=3">
-<link rel="shortcut icon" type="image/png" href="icon-192.png?v=3">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+<link rel="icon" type="image/png" sizes="512x512" href="icon-512.png">
+<link rel="icon" type="image/png" sizes="64x64" href="favicon.png">
+<link rel="shortcut icon" type="image/png" href="favicon.png">
 <style>
   :root{
     --bg:#1c1f26;
@@ -195,12 +197,45 @@
   }
   .telBtn:active{transform:scale(.98);}
   .telBtn .ico{font-size:22px;line-height:1;}
+
+  /* 히어로 이미지 (성별 선택 화면 상단) */
+  .hero{display:flex;flex-direction:column;align-items:center;gap:10px;margin-bottom:6px;}
+  .heroArt{width:min(78vw,300px);height:auto;display:block;filter:drop-shadow(0 10px 24px rgba(0,0,0,.5));}
+  .heroTitle{font-size:30px;font-weight:900;letter-spacing:.1em;color:var(--gold2);
+    text-shadow:0 2px 12px rgba(0,0,0,.6);}
 </style>
 
 <div class="wrap">
 
   <!-- 1) 성별 선택 화면 -->
   <section id="화면_성별" class="screen active">
+    <!-- 히어로: 자체 제작 SVG(트럭+콜) — 저작권 안전, 화면에서 이미지 바로 확인 가능 -->
+    <div class="hero">
+      <svg class="heroArt" viewBox="0 0 240 150" role="img" aria-label="기사콜 트럭 로고" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <linearGradient id="gCard" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stop-color="#262b38"/><stop offset="1" stop-color="#171a22"/>
+          </linearGradient>
+          <linearGradient id="gGold" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stop-color="#e6be3f"/><stop offset="1" stop-color="#c9a227"/>
+          </linearGradient>
+        </defs>
+        <rect x="1" y="1" width="238" height="148" rx="20" fill="url(#gCard)" stroke="#c9a227" stroke-opacity=".5"/>
+        <!-- 트럭 -->
+        <rect x="44" y="52" width="74" height="46" rx="4" fill="url(#gGold)"/>
+        <path d="M118 98V60h20l22 16v22z" fill="#e6be3f"/>
+        <path d="M126 64h9l14 11h-23z" fill="#171a22"/>
+        <line x1="44" y1="104" x2="150" y2="104" stroke="#c9a227" stroke-width="3" stroke-linecap="round"/>
+        <circle cx="66" cy="104" r="10" fill="#12141a"/><circle cx="66" cy="104" r="4.5" fill="#c0392f"/>
+        <circle cx="140" cy="104" r="10" fill="#12141a"/><circle cx="140" cy="104" r="4.5" fill="#c0392f"/>
+        <!-- 콜 배지 -->
+        <circle cx="170" cy="104" r="26" fill="#8f2f38" stroke="#c9a227" stroke-width="2.5"/>
+        <path d="M160 95c-2 6 1 13 6 18s12 8 18 6l-4-8-6 1-7-7 1-6z" fill="#e6be3f"/>
+        <!-- 상단 골드 램프 -->
+        <rect x="90" y="30" width="60" height="9" rx="4.5" fill="#c9a227"/>
+      </svg>
+      <div class="heroTitle">기사콜</div>
+    </div>
     <div class="genderRow">
       <button class="btn man" onclick="성별선택()">
         <span class="ico">♂</span>
@@ -288,5 +323,11 @@
     setTimeout(function(){
       document.getElementById('종료안내').classList.add('show');
     }, 250);
+  }
+  // 서비스워커 등록: 설치형 PWA 요건 충족 → 홈 화면 추가 시 주소창 없는 전체화면
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', function(){
+      navigator.serviceWorker.register('서비스워커.js').catch(function(){});
+    });
   }
 </script>
