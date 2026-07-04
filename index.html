@@ -319,7 +319,7 @@
 <div id="종료안내" class="goodbye">
   <div class="gbInner">
     <div class="gbIco">👋</div>
-    <h2>앱을 종료했습니다.<br>창을 닫아주세요.</h2>
+    <h2>앱을 종료했습니다.<br>홈 버튼을 눌러 나가주세요.</h2>
     <p>오늘도 안전운행 하세요, 기사님!</p>
   </div>
 </div>
@@ -362,13 +362,18 @@
     document.getElementById('알림').classList.remove('show');
   }
   function 앱종료(){
-    // 1) 스크립트로 연 창이면 닫기 시도
-    try { window.open('', '_self'); window.close(); } catch(e){}
+    // 설치형(홈 화면 추가) PWA 감지
+    var 설치형 = (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches)
+                 || window.navigator.standalone === true;
+    console.log("[기사콜] 종료 시도, 설치형(standalone):", 설치형);
+    // 1순위: window.close(). 설치형이면 앱 창을 닫고 폰 홈 화면으로 복귀함.
+    //  ※ 빈 페이지/다른 URL로 이동하는 폴백은 완전히 없앰 → 크롬 검색창이 뜨는 일 없음.
     try { window.close(); } catch(e){}
-    // 2) 안 닫히면(대부분의 브라우저) 폴백: 큰 안내 오버레이 표시
+    // 창이 안 닫히는 일반 브라우저 탭이면: 어디로도 이동하지 말고 다크 종료 오버레이만 표시.
+    //  (실제로 닫혔으면 이 타이머 실행 전에 창이 사라져 오버레이는 보이지 않음)
     setTimeout(function(){
       document.getElementById('종료안내').classList.add('show');
-    }, 250);
+    }, 300);
   }
   // 서비스워커 등록: 설치형 PWA 요건 충족 → 홈 화면 추가 시 주소창 없는 전체화면
   if ('serviceWorker' in navigator) {
