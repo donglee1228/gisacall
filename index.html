@@ -1,0 +1,215 @@
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#1c1f26">
+<title>기사콜</title>
+<style>
+  :root{
+    --bg:#1c1f26;
+    --bg2:#151820;
+    --card:#232733;
+    --gold:#c9a227;
+    --gold2:#e6be3f;
+    --red:#8f2f38;
+    --red2:#c0392f;
+    --blue:#2f5d8f;
+    --purple:#5a3f7a;
+    --text:#e8e6df;
+    --muted:#8a8f9c;
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  html,body{height:100%;margin:0;}
+  body{
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Malgun Gothic",sans-serif;
+    color:var(--text);
+    background:
+      radial-gradient(1200px 600px at 50% -10%, #262b38 0%, rgba(38,43,56,0) 60%),
+      linear-gradient(180deg,var(--bg) 0%,var(--bg2) 100%);
+    background-attachment:fixed;
+    min-height:100dvh;
+    position:relative;
+    overflow-x:hidden;
+  }
+  /* 미세 노이즈 텍스처 */
+  body::before{
+    content:"";
+    position:fixed;inset:0;pointer-events:none;z-index:0;opacity:.05;
+    background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='140' height='140'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
+  }
+  .wrap{
+    position:relative;z-index:1;
+    min-height:100dvh;
+    display:flex;flex-direction:column;
+    align-items:center;justify-content:center;
+    padding:24px 20px calc(24px + env(safe-area-inset-bottom));
+    gap:18px;
+  }
+  .brand{
+    text-align:center;margin-bottom:6px;
+  }
+  .brand h1{
+    margin:0;font-size:34px;letter-spacing:.06em;font-weight:800;
+    color:var(--gold2);
+    text-shadow:0 2px 10px rgba(0,0,0,.5);
+  }
+  .brand p{margin:6px 0 0;color:var(--muted);font-size:14px;letter-spacing:.04em;}
+  .screen{width:100%;max-width:440px;display:none;flex-direction:column;gap:16px;}
+  .screen.active{display:flex;animation:fade .35s ease;}
+  @keyframes fade{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:none;}}
+  .label{color:var(--muted);text-align:center;font-size:15px;letter-spacing:.03em;}
+  .genderRow{display:flex;gap:14px;}
+  .btn{
+    border:1px solid rgba(255,255,255,.08);
+    border-radius:18px;
+    color:var(--text);
+    font-size:20px;font-weight:700;letter-spacing:.04em;
+    padding:26px 12px;
+    cursor:pointer;
+    flex:1;
+    display:flex;flex-direction:column;align-items:center;gap:8px;
+    transition:transform .08s ease, box-shadow .2s ease, filter .2s ease;
+    box-shadow:0 8px 22px rgba(0,0,0,.35), inset 0 1px 0 rgba(255,255,255,.06);
+  }
+  .btn:active{transform:scale(.97);}
+  .btn .ico{font-size:34px;line-height:1;}
+  .btn.man{
+    background:linear-gradient(160deg,#2f5d8f 0%,#213f5f 55%,#1a2a3e 100%);
+    border-color:rgba(201,162,39,.35);
+  }
+  .btn.man .sub{color:var(--gold2);}
+  .btn.woman{
+    background:linear-gradient(160deg,#7a2f4a 0%,#5a3f7a 55%,#3a2450 100%);
+    border-color:rgba(192,57,47,.4);
+  }
+  .btn.woman .sub{color:#e6a3c0;}
+  .btn .sub{font-size:12px;font-weight:600;letter-spacing:.08em;opacity:.9;}
+
+  .greet{text-align:center;color:var(--muted);font-size:14px;}
+  .greet b{color:var(--gold2);font-weight:700;}
+  .callBtn{
+    width:100%;
+    border:1px solid rgba(201,162,39,.5);
+    border-radius:20px;
+    background:linear-gradient(160deg,#2a2f3d 0%,#20242f 100%);
+    color:var(--text);
+    font-size:22px;font-weight:800;line-height:1.4;letter-spacing:.02em;
+    padding:30px 20px;
+    cursor:pointer;
+    box-shadow:0 10px 26px rgba(0,0,0,.4), inset 0 1px 0 rgba(255,255,255,.06);
+    transition:transform .08s ease;
+  }
+  .callBtn:active{transform:scale(.98);}
+  .callBtn .k{color:var(--gold2);}
+  .link{
+    background:none;border:none;color:var(--muted);font-size:13px;
+    text-decoration:underline;cursor:pointer;padding:6px;
+  }
+
+  /* 알림 오버레이 */
+  .alert{
+    position:fixed;inset:0;z-index:50;
+    display:none;align-items:center;justify-content:center;
+    padding:24px;
+    background:radial-gradient(circle at 50% 40%, rgba(143,47,56,.55), rgba(0,0,0,.9));
+    backdrop-filter:blur(2px);
+  }
+  .alert.show{display:flex;animation:pop .3s ease;}
+  @keyframes pop{from{opacity:0;}to{opacity:1;}}
+  .alertCard{
+    text-align:center;max-width:420px;
+  }
+  .siren{
+    font-size:72px;line-height:1;margin-bottom:10px;
+    animation:shake .5s ease infinite;
+  }
+  @keyframes shake{0%,100%{transform:rotate(-8deg) scale(1);}50%{transform:rotate(8deg) scale(1.12);}}
+  .alertCard h2{
+    margin:0 0 6px;font-size:40px;font-weight:900;letter-spacing:.02em;
+    color:var(--gold2);text-shadow:0 3px 14px rgba(0,0,0,.7);
+    animation:pulse 1s ease infinite;
+  }
+  @keyframes pulse{0%,100%{transform:scale(1);}50%{transform:scale(1.06);}}
+  .alertCard .big{
+    font-size:26px;font-weight:800;color:#fff;margin:8px 0 4px;line-height:1.4;
+  }
+  .alertCard .cart{font-size:64px;font-weight:900;color:var(--red2);}
+  .alertCard p{color:#e8e6df;opacity:.85;margin:10px 0 24px;font-size:15px;}
+  .closeBtn{
+    border:1px solid rgba(201,162,39,.5);border-radius:14px;
+    background:linear-gradient(160deg,#c9a227,#a5851d);
+    color:#1c1f26;font-weight:800;font-size:16px;letter-spacing:.05em;
+    padding:14px 34px;cursor:pointer;
+  }
+  .foot{position:fixed;left:0;right:0;bottom:0;z-index:1;text-align:center;
+    color:#4a4f5c;font-size:11px;padding:8px;letter-spacing:.05em;}
+</style>
+
+<div class="wrap">
+  <div class="brand">
+    <h1>기사콜</h1>
+    <p>배달·물류 기사 전용 · 오늘도 안전운행</p>
+  </div>
+
+  <!-- 1) 성별 선택 화면 -->
+  <section id="화면_성별" class="screen active">
+    <div class="label">기사님, 성별을 선택해주세요</div>
+    <div class="genderRow">
+      <button class="btn man" onclick="성별선택('남자')">
+        <span class="ico">♂</span>
+        <span>남자</span>
+        <span class="sub">MALE</span>
+      </button>
+      <button class="btn woman" onclick="성별선택('여자')">
+        <span class="ico">♀</span>
+        <span>여자</span>
+        <span class="sub">FEMALE</span>
+      </button>
+    </div>
+  </section>
+
+  <!-- 2) 물량 버튼 화면 -->
+  <section id="화면_물량" class="screen">
+    <div class="greet">환영합니다 · <b id="선택된성별">기사</b>님</div>
+    <button class="callBtn" onclick="물량알림()">
+      기사님 오늘 물량 <span class="k">15카트</span>넘어요!
+    </button>
+    <button class="link" onclick="처음으로()">← 성별 다시 선택</button>
+  </section>
+</div>
+
+<!-- 알림 오버레이 -->
+<div id="알림" class="alert" onclick="알림닫기(event)">
+  <div class="alertCard">
+    <div class="siren">🚨</div>
+    <h2>물량 폭주!</h2>
+    <div class="big">기사님 오늘 물량</div>
+    <div class="cart">15카트 ↑</div>
+    <div class="big">넘어요!</div>
+    <p>단단히 준비하고 파이팅입니다 💪</p>
+    <button class="closeBtn" onclick="알림닫기()">확인</button>
+  </div>
+</div>
+
+<div class="foot">기사콜 · 상태 저장 없음</div>
+
+<script>
+  function 보이기(id){
+    document.querySelectorAll('.screen').forEach(function(s){s.classList.remove('active');});
+    document.getElementById(id).classList.add('active');
+  }
+  function 성별선택(성별){
+    document.getElementById('선택된성별').textContent = 성별;
+    보이기('화면_물량');
+  }
+  function 처음으로(){
+    보이기('화면_성별');
+  }
+  function 물량알림(){
+    var a = document.getElementById('알림');
+    a.classList.add('show');
+    if (navigator.vibrate) { try { navigator.vibrate([120,60,120]); } catch(e){} }
+  }
+  function 알림닫기(e){
+    if (e && e.target && e.target.id !== '알림' && !e.target.classList.contains('closeBtn')) return;
+    document.getElementById('알림').classList.remove('show');
+  }
+</script>
