@@ -43,56 +43,41 @@
     padding:24px 20px calc(24px + env(safe-area-inset-bottom));
     gap:18px;
   }
-  .brand{
-    text-align:center;margin-bottom:6px;
-  }
-  .brand h1{
-    margin:0;font-size:34px;letter-spacing:.06em;font-weight:800;
-    color:var(--gold2);
-    text-shadow:0 2px 10px rgba(0,0,0,.5);
-  }
-  .brand p{margin:6px 0 0;color:var(--muted);font-size:14px;letter-spacing:.04em;}
   .screen{width:100%;max-width:440px;display:none;flex-direction:column;gap:16px;}
   .screen.active{display:flex;animation:fade .35s ease;}
   @keyframes fade{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:none;}}
-  .label{color:var(--muted);text-align:center;font-size:15px;letter-spacing:.03em;}
-  .genderRow{display:flex;gap:14px;}
+  .genderRow{display:flex;flex-direction:column;gap:14px;}
   .btn{
     border:1px solid rgba(255,255,255,.08);
     border-radius:18px;
     color:var(--text);
-    font-size:20px;font-weight:700;letter-spacing:.04em;
-    padding:26px 12px;
+    font-size:22px;font-weight:700;letter-spacing:.02em;
+    padding:28px 16px;
     cursor:pointer;
-    flex:1;
-    display:flex;flex-direction:column;align-items:center;gap:8px;
+    width:100%;
+    display:flex;align-items:center;justify-content:center;gap:12px;
     transition:transform .08s ease, box-shadow .2s ease, filter .2s ease;
     box-shadow:0 8px 22px rgba(0,0,0,.35), inset 0 1px 0 rgba(255,255,255,.06);
   }
   .btn:active{transform:scale(.97);}
-  .btn .ico{font-size:34px;line-height:1;}
+  .btn .ico{font-size:30px;line-height:1;}
   .btn.man{
     background:linear-gradient(160deg,#2f5d8f 0%,#213f5f 55%,#1a2a3e 100%);
     border-color:rgba(201,162,39,.35);
   }
-  .btn.man .sub{color:var(--gold2);}
   .btn.woman{
     background:linear-gradient(160deg,#7a2f4a 0%,#5a3f7a 55%,#3a2450 100%);
     border-color:rgba(192,57,47,.4);
   }
-  .btn.woman .sub{color:#e6a3c0;}
-  .btn .sub{font-size:12px;font-weight:600;letter-spacing:.08em;opacity:.9;}
 
-  .greet{text-align:center;color:var(--muted);font-size:14px;}
-  .greet b{color:var(--gold2);font-weight:700;}
   .callBtn{
     width:100%;
     border:1px solid rgba(201,162,39,.5);
     border-radius:20px;
     background:linear-gradient(160deg,#2a2f3d 0%,#20242f 100%);
     color:var(--text);
-    font-size:22px;font-weight:800;line-height:1.4;letter-spacing:.02em;
-    padding:30px 20px;
+    font-size:24px;font-weight:800;line-height:1.4;letter-spacing:.02em;
+    padding:34px 20px;
     cursor:pointer;
     box-shadow:0 10px 26px rgba(0,0,0,.4), inset 0 1px 0 rgba(255,255,255,.06);
     transition:transform .08s ease;
@@ -123,56 +108,46 @@
   }
   @keyframes shake{0%,100%{transform:rotate(-8deg) scale(1);}50%{transform:rotate(8deg) scale(1.12);}}
   .alertCard h2{
-    margin:0 0 6px;font-size:40px;font-weight:900;letter-spacing:.02em;
+    margin:0 0 6px;font-size:38px;font-weight:900;letter-spacing:.02em;
     color:var(--gold2);text-shadow:0 3px 14px rgba(0,0,0,.7);
     animation:pulse 1s ease infinite;
   }
   @keyframes pulse{0%,100%{transform:scale(1);}50%{transform:scale(1.06);}}
-  .alertCard .big{
-    font-size:26px;font-weight:800;color:#fff;margin:8px 0 4px;line-height:1.4;
+  .alertCard .cart{font-size:60px;font-weight:900;color:var(--red2);margin:6px 0;}
+  .thanks{
+    margin:14px 0 24px;font-size:24px;font-weight:800;color:#fff;line-height:1.4;
+    text-shadow:0 2px 10px rgba(0,0,0,.6);
   }
-  .alertCard .cart{font-size:64px;font-weight:900;color:var(--red2);}
-  .alertCard p{color:#e8e6df;opacity:.85;margin:10px 0 24px;font-size:15px;}
   .closeBtn{
     border:1px solid rgba(201,162,39,.5);border-radius:14px;
     background:linear-gradient(160deg,#c9a227,#a5851d);
     color:#1c1f26;font-weight:800;font-size:16px;letter-spacing:.05em;
     padding:14px 34px;cursor:pointer;
   }
-  .foot{position:fixed;left:0;right:0;bottom:0;z-index:1;text-align:center;
-    color:#4a4f5c;font-size:11px;padding:8px;letter-spacing:.05em;}
 </style>
 
 <div class="wrap">
-  <div class="brand">
-    <h1>기사콜</h1>
-    <p>배달·물류 기사 전용 · 오늘도 안전운행</p>
-  </div>
 
   <!-- 1) 성별 선택 화면 -->
   <section id="화면_성별" class="screen active">
-    <div class="label">기사님, 성별을 선택해주세요</div>
     <div class="genderRow">
-      <button class="btn man" onclick="성별선택('남자')">
+      <button class="btn man" onclick="성별선택()">
         <span class="ico">♂</span>
-        <span>남자</span>
-        <span class="sub">MALE</span>
+        <span>저는 남자 입니다</span>
       </button>
-      <button class="btn woman" onclick="성별선택('여자')">
+      <button class="btn woman" onclick="성별선택()">
         <span class="ico">♀</span>
-        <span>여자</span>
-        <span class="sub">FEMALE</span>
+        <span>저는 여자입니다</span>
       </button>
     </div>
   </section>
 
-  <!-- 2) 물량 버튼 화면 -->
+  <!-- 2) 물량 패널 화면 -->
   <section id="화면_물량" class="screen">
-    <div class="greet">환영합니다 · <b id="선택된성별">기사</b>님</div>
     <button class="callBtn" onclick="물량알림()">
-      기사님 오늘 물량 <span class="k">15카트</span>넘어요!
+      기사님 오늘 <span class="k">15카트</span>넘어요!
     </button>
-    <button class="link" onclick="처음으로()">← 성별 다시 선택</button>
+    <button class="link" onclick="처음으로()">← 다시 선택</button>
   </section>
 </div>
 
@@ -181,23 +156,18 @@
   <div class="alertCard">
     <div class="siren">🚨</div>
     <h2>물량 폭주!</h2>
-    <div class="big">기사님 오늘 물량</div>
     <div class="cart">15카트 ↑</div>
-    <div class="big">넘어요!</div>
-    <p>단단히 준비하고 파이팅입니다 💪</p>
+    <div class="thanks">감사합니다 오늘 빨리가겠습니다!</div>
     <button class="closeBtn" onclick="알림닫기()">확인</button>
   </div>
 </div>
-
-<div class="foot">기사콜 · 상태 저장 없음</div>
 
 <script>
   function 보이기(id){
     document.querySelectorAll('.screen').forEach(function(s){s.classList.remove('active');});
     document.getElementById(id).classList.add('active');
   }
-  function 성별선택(성별){
-    document.getElementById('선택된성별').textContent = 성별;
+  function 성별선택(){
     보이기('화면_물량');
   }
   function 처음으로(){
