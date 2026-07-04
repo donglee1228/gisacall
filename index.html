@@ -150,6 +150,33 @@
     text-shadow:0 3px 14px rgba(0,0,0,.7);
   }
   .goodbye p{margin:18px 0 0;color:#cfd3dc;font-size:clamp(20px,5vw,28px);font-weight:700;line-height:1.5;}
+
+  /* 기사 전화하기 목록 */
+  .callList{
+    margin:26px auto 0;max-width:420px;width:100%;
+    border-top:1px solid rgba(255,255,255,.12);padding-top:20px;
+    display:flex;flex-direction:column;gap:16px;
+  }
+  .callList .listTitle{color:var(--gold2);font-size:20px;font-weight:800;letter-spacing:.03em;}
+  .driverCard{
+    background:var(--card);border:1px solid rgba(255,255,255,.08);border-radius:18px;
+    padding:18px 16px;text-align:left;
+    box-shadow:0 6px 16px rgba(0,0,0,.35), inset 0 1px 0 rgba(255,255,255,.05);
+  }
+  .driverCard .name{font-size:22px;font-weight:800;color:var(--text);}
+  .driverCard .num{font-size:24px;font-weight:900;color:var(--gold2);letter-spacing:.04em;margin-top:4px;}
+  .telBtn{
+    display:flex;align-items:center;justify-content:center;gap:10px;
+    width:100%;margin-top:14px;
+    border:2px solid rgba(201,162,39,.55);border-radius:18px;
+    background:linear-gradient(160deg,#2e7d5b 0%,#256b4d 55%,#1c503a 100%);
+    color:#fff;font-weight:900;font-size:26px;letter-spacing:.04em;
+    padding:24px 16px;cursor:pointer;text-decoration:none;
+    box-shadow:0 8px 20px rgba(0,0,0,.4), inset 0 1px 0 rgba(255,255,255,.12);
+    transition:transform .08s ease;
+  }
+  .telBtn:active{transform:scale(.98);}
+  .telBtn .ico{font-size:28px;line-height:1;}
 </style>
 
 <div class="wrap">
@@ -186,6 +213,21 @@
     <div class="thanks">감사합니다 오늘 빨리가겠습니다!</div>
     <button class="closeBtn" onclick="알림닫기()">확인</button>
     <button class="exitBtn" onclick="앱종료()">종료하기</button>
+
+    <!-- 기사 전화하기 목록 -->
+    <div class="callList">
+      <div class="listTitle">📞 기사님께 전화하기</div>
+      <div class="driverCard">
+        <div class="name">이기동 기사 (뚱땡이)</div>
+        <div class="num">010-3805-9275</div>
+        <a class="telBtn" href="tel:01038059275"><span class="ico">📞</span>전화하기</a>
+      </div>
+      <div class="driverCard">
+        <div class="name">김종대 기사</div>
+        <div class="num">010-3383-5808</div>
+        <a class="telBtn" href="tel:01033835808"><span class="ico">📞</span>전화하기</a>
+      </div>
+    </div>
   </div>
 </div>
 
