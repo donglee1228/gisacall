@@ -434,13 +434,15 @@
     try { localStorage.setItem(LS_예외키, JSON.stringify(map)); } catch(e){}
   }
 
-  // ===== 오늘 근무자 판정 (KST 기준) =====
-  // 우선순위: ① 이 폰 localStorage 예외 → ② 코드 하드코딩 예외근무 → ③ 기본 격일제(2026-07-05=김종대)
+  // ===== 오늘 근무자 판정 (오전 9시 교대 근무일 기준) =====
+  // 우선순위: ① 이 폰 localStorage 예외 → ② 코드 하드코딩 예외근무 → ③ 기본 격일제
+  // ③ 기준: 근무일 2026-07-08 = 김종대(kim).  (7/8 오전 9시부터 김종대 턴, 7/8 새벽까지는 이기동)
+  //    → 근무일 짝수차=김종대, 홀수차=이기동. 예) 07-08 kim / 07-09 lee / 07-10 kim ...
   function 근무자판정(dateStr, dateObj){
     var 로컬 = 로컬예외로드();
     if (로컬[dateStr] === 'kim' || 로컬[dateStr] === 'lee') return 로컬[dateStr];   // ①
     if (예외근무[dateStr]) return 예외근무[dateStr];                                 // ②
-    var diff = Math.round((dateObj - new Date(2026, 6, 5)) / 86400000);              // ③
+    var diff = Math.round((dateObj - new Date(2026, 6, 8)) / 86400000);              // ③ 기준일 07-08=김종대
     return ((((diff % 2) + 2) % 2) === 0) ? 'kim' : 'lee';
   }
   function who객체(who){
