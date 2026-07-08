@@ -251,6 +251,34 @@
     font-size:13px;font-weight:700;padding:8px 12px;cursor:pointer;}
   .exEmpty{font-size:13px;color:var(--muted);text-align:center;padding:10px;}
 
+  /* 근무표 달력 */
+  .calHead{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;}
+  .calMonth{font-size:18px;font-weight:900;color:var(--gold2);}
+  .calNav{background:#1a1e28;border:1px solid rgba(201,162,39,.4);border-radius:10px;color:var(--gold2);
+    font-size:18px;font-weight:900;width:46px;height:40px;cursor:pointer;}
+  .calNav:active{transform:scale(.95);}
+  .calDow{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin-bottom:4px;}
+  .calDow span{text-align:center;font-size:12px;font-weight:700;color:var(--muted);padding:2px 0;}
+  .calDow .sun{color:#e07a72;} .calDow .sat{color:#7fb3e6;}
+  .calGrid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;}
+  .calCell{position:relative;min-height:46px;border-radius:9px;border:1px solid rgba(255,255,255,.06);
+    background:#12141a;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;
+    cursor:pointer;padding:3px 0;}
+  .calCell.empty{background:transparent;border:none;cursor:default;}
+  .calCell .cd{font-size:13px;font-weight:800;color:var(--text);line-height:1;}
+  .calCell .cw{font-size:12px;font-weight:900;line-height:1;}
+  .calCell.kim .cw{color:var(--gold2);}
+  .calCell.lee .cw{color:#7fb3e6;}
+  .calCell.sun .cd{color:#e07a72;} .calCell.sat .cd{color:#7fb3e6;}
+  .calCell.today{border-color:rgba(230,190,63,.85);box-shadow:inset 0 0 0 1px rgba(230,190,63,.55);}
+  .calCell.sel{background:#2a2410;border-color:var(--gold);box-shadow:0 0 0 2px rgba(201,162,39,.65);}
+  .calCell .cx{position:absolute;top:2px;right:4px;font-size:9px;color:#e07a72;line-height:1;}
+  .calLegend{display:flex;gap:14px;justify-content:center;margin-top:10px;font-size:12px;font-weight:700;}
+  .calLegend .kim{color:var(--gold2);} .calLegend .lee{color:#7fb3e6;} .calLegend .exx{color:#e07a72;}
+  .calHelp{margin-top:8px;font-size:12px;color:var(--muted);text-align:center;line-height:1.45;}
+  .calHelp b{color:var(--gold2);}
+  .selBox .selInfo{font-size:16px;font-weight:800;color:var(--text);margin-bottom:12px;text-align:center;}
+
   /* 히어로 이미지 (성별 선택 화면 상단) */
   .hero{display:flex;flex-direction:column;align-items:center;gap:10px;margin-bottom:6px;}
   .heroArt{width:min(78vw,300px);height:auto;display:block;filter:drop-shadow(0 10px 24px rgba(0,0,0,.5));}
@@ -274,8 +302,10 @@
   .noticeSub{margin-top:8px;font-size:14px;font-weight:700;color:var(--muted);}
   /* 첫화면 인라인 기사 카드 영역 제목 */
   .frontListTitle{color:var(--gold2);font-size:17px;font-weight:800;letter-spacing:.03em;text-align:center;margin-top:2px;}
-  .shiftNote{text-align:center;font-size:12.5px;color:var(--muted);font-weight:700;margin-top:-6px;}
-  .shiftNote b{color:var(--gold2);}
+  /* 오늘의 안내 멘트 */
+  .notice2{width:100%;text-align:center;font-size:14.5px;font-weight:800;color:var(--text);
+    background:#20242f;border:1px solid rgba(201,162,39,.35);border-radius:14px;padding:12px 14px;line-height:1.5;}
+  .notice2 b{color:var(--gold2);}
 </style>
 
 <div class="wrap">
@@ -315,9 +345,11 @@
       <div class="noticeSub">※ 15카트는 전화 안 하셔도 돼요</div>
     </div>
 
+    <!-- 오늘의 안내 멘트 -->
+    <div class="notice2">🚚 <b>7월 9일 새벽</b> 용인쿠팡 가는 기사는 <b>김종대 기사</b>입니다</div>
+
     <!-- 일하는 기사에게 바로 전화 (뒷장 카드를 첫화면으로 이동) -->
     <div class="frontListTitle">📞 일하는 기사님께 바로 전화</div>
-    <div class="shiftNote">근무자는 매일 <b>오전 9시</b>에 교대돼요</div>
     <div class="driverRow">
       <div class="driverCard">
         <div class="name">이기동 기사<br>(뚱땡이)</div>
@@ -358,20 +390,30 @@
     <!-- 수정 단계 -->
     <div id="관리자_수정" style="display:none">
       <div class="adminTitle">근무표 수정</div>
-      <div class="adminToday" id="관리자_오늘">오늘 근무: -</div>
+      <div class="adminToday" id="관리자_오늘">지금 근무: -</div>
+
+      <!-- 한 달 달력 -->
       <div class="adminSection">
-        <div class="adminLabel">날짜 선택</div>
-        <input id="관리자_날짜" class="adminInput" type="date">
-        <div class="adminLabel" style="margin-top:10px">그날 근무자</div>
-        <div class="adminPick">
-          <button class="pickBtn" id="pick_kim" onclick="근무자픽('kim')">김종대 기사</button>
-          <button class="pickBtn" id="pick_lee" onclick="근무자픽('lee')">이기동 기사</button>
+        <div class="calHead">
+          <button class="calNav" onclick="달력이동(-1)">◀</button>
+          <div class="calMonth" id="달력월">-</div>
+          <button class="calNav" onclick="달력이동(1)">▶</button>
         </div>
-        <button class="adminBtn ok wide" onclick="예외저장()">이 날짜 저장</button>
+        <div class="calDow"><span class="sun">일</span><span>월</span><span>화</span><span>수</span><span>목</span><span>금</span><span class="sat">토</span></div>
+        <div class="calGrid" id="달력그리드"></div>
+        <div class="calLegend"><span class="kim">김종대</span><span class="lee">이기동</span><span class="exx">● 바꾼 날</span></div>
+        <div class="calHelp">날짜를 누른 뒤 아래 <b>기사 바뀜</b>을 누르면 그 날 기사가 바뀝니다</div>
+      </div>
+
+      <!-- 날짜 선택 후 기사 바뀜 -->
+      <div class="adminSection selBox" id="선택박스" style="display:none">
+        <div class="selInfo" id="선택정보">-</div>
+        <button class="adminBtn ok wide" onclick="기사바뀜()">🔄 기사 바뀜</button>
         <div class="adminMsg" id="관리자_수정msg">&nbsp;</div>
       </div>
+
       <div class="adminSection">
-        <div class="adminLabel">저장된 예외 (이 폰에만 적용)</div>
+        <div class="adminLabel">직접 바꾼 날짜 (이 폰에만 적용)</div>
         <div id="예외목록" class="exList"></div>
       </div>
       <button class="adminBtn cancel wide" onclick="관리자닫기()">닫기</button>
@@ -480,9 +522,10 @@
       document.getElementById('종료안내').classList.add('show');
     }, 300);
   }
-  // ===== 사장님 근무표 수정 패널 =====
+  // ===== 사장님 근무표 수정 패널 (한 달 달력형) =====
   var 관리자비번 = "001234";
-  var 픽선택 = "";   // 수정 화면에서 고른 근무자('kim'/'lee')
+  var 달력기준 = null;   // 현재 보고 있는 달 {y, m(0-based)}
+  var 선택날짜 = null;   // 클릭한 날짜 'YYYY-MM-DD'
 
   function 관리자열기(){
     document.getElementById('관리자_잠금').style.display = '';
@@ -501,48 +544,125 @@
     if (v === 관리자비번) {
       document.getElementById('관리자_잠금').style.display = 'none';
       document.getElementById('관리자_수정').style.display = '';
-      var k = kst날짜();
-      document.getElementById('관리자_날짜').value = k.s;   // 기본값 오늘
-      픽선택 = 근무자판정(k.s, k.dateObj);
-      픽갱신();
+      var g = 근무일자();
+      달력기준 = { y: g.y, m: g.m };   // 이번 달부터 표시
+      선택날짜 = null;
+      선택박스숨김();
       수정화면갱신();
+      달력그리드렌더();
     } else {
       msg.textContent = '비밀번호가 틀립니다';
       document.getElementById('관리자_비번').value = '';
     }
   }
-  function 근무자픽(who){ 픽선택 = who; 픽갱신(); }
-  function 픽갱신(){
-    document.getElementById('pick_kim').className = 'pickBtn' + (픽선택==='kim' ? ' sel' : '');
-    document.getElementById('pick_lee').className = 'pickBtn' + (픽선택==='lee' ? ' sel' : '');
+  // 기본 격일제만(예외 미적용) — '되돌림' 판정용
+  function 기본근무자(dateObj){
+    var diff = Math.round((dateObj - new Date(2026, 6, 8)) / 86400000);
+    return ((((diff % 2) + 2) % 2) === 0) ? 'kim' : 'lee';
   }
+  function 날짜문자(y,m,d){ return y + '-' + String(m+1).padStart(2,'0') + '-' + String(d).padStart(2,'0'); }
+
+  window.달력이동 = function(delta){
+    if (!달력기준) return;
+    var m = 달력기준.m + delta, y = 달력기준.y;
+    if (m < 0){ m = 11; y--; } else if (m > 11){ m = 0; y++; }
+    달력기준 = { y:y, m:m };
+    선택날짜 = null; 선택박스숨김();
+    달력그리드렌더();
+  };
+
+  function 달력그리드렌더(){
+    var 그리드 = document.getElementById('달력그리드');
+    var 월el = document.getElementById('달력월');
+    if (!그리드 || !달력기준) return;
+    var y = 달력기준.y, m = 달력기준.m;
+    if (월el) 월el.textContent = y + '년 ' + (m+1) + '월';
+    var 시작요일 = new Date(y, m, 1).getDay();      // 0=일
+    var 말일 = new Date(y, m+1, 0).getDate();
+    var 오늘s = 근무일자().s;
+    var map = 로컬예외로드();
+    var html = '';
+    for (var i=0; i<시작요일; i++) html += '<div class="calCell empty"></div>';
+    for (var d=1; d<=말일; d++){
+      var s = 날짜문자(y, m, d);
+      var dObj = new Date(y, m, d);
+      var who = 근무자판정(s, dObj);
+      var 수정됨 = (map[s] === 'kim' || map[s] === 'lee');
+      var 요일 = dObj.getDay();
+      var cls = 'calCell ' + who
+        + (s === 오늘s ? ' today' : '')
+        + (s === 선택날짜 ? ' sel' : '')
+        + (수정됨 ? ' ex' : '')
+        + (요일 === 0 ? ' sun' : (요일 === 6 ? ' sat' : ''));
+      html += '<div class="' + cls + '" onclick="날짜클릭(\'' + s + '\')">'
+            + '<span class="cd">' + d + '</span>'
+            + '<span class="cw">' + (who === 'kim' ? '김' : '이') + '</span>'
+            + (수정됨 ? '<span class="cx">●</span>' : '')
+            + '</div>';
+    }
+    그리드.innerHTML = html;
+  }
+
+  window.날짜클릭 = function(s){
+    선택날짜 = s;
+    달력그리드렌더();
+    선택박스표시(s);
+  };
+  function 선택박스숨김(){
+    var b = document.getElementById('선택박스');
+    if (b) b.style.display = 'none';
+  }
+  function 선택박스표시(s){
+    var b = document.getElementById('선택박스');
+    var info = document.getElementById('선택정보');
+    var msg = document.getElementById('관리자_수정msg');
+    if (!b || !info) return;
+    var p = s.split('-');
+    var dObj = new Date(+p[0], +p[1]-1, +p[2]);
+    var who = 근무자판정(s, dObj);
+    info.innerHTML = (+p[1]) + '월 ' + (+p[2]) + '일 · 현재 <b>' + (who==='kim'?'김종대':'이기동') + ' 기사</b>';
+    if (msg){ msg.innerHTML = '&nbsp;'; msg.className = 'adminMsg'; }
+    b.style.display = '';
+  }
+
+  // 선택한 날짜의 기사를 다른 기사로 토글(이 폰 localStorage 예외로 저장)
+  window.기사바뀜 = function(){
+    if (!선택날짜) return;
+    var p = 선택날짜.split('-');
+    var dObj = new Date(+p[0], +p[1]-1, +p[2]);
+    var cur = 근무자판정(선택날짜, dObj);
+    var next = (cur === 'kim') ? 'lee' : 'kim';
+    var base = 기본근무자(dObj);
+    var map = 로컬예외로드();
+    if (next === base) delete map[선택날짜];   // 원래 격일제와 같아지면 예외 제거(깔끔 유지)
+    else map[선택날짜] = next;
+    로컬예외저장(map);
+    달력그리드렌더();
+    선택박스표시(선택날짜);   // '현재 …기사' 표시 즉시 갱신(내부에서 msg 초기화됨)
+    예외목록렌더();
+    상태갱신();               // 오늘이면 첫화면 (일하는중)도 즉시 반영
+    // ★성공 메시지는 선택박스표시() 뒤에 세팅해야 덮어써지지 않음
+    var msg = document.getElementById('관리자_수정msg');
+    if (msg){
+      msg.textContent = (+p[1]) + '월 ' + (+p[2]) + '일 → ' + (next==='kim'?'김종대':'이기동') + ' 기사로 바뀜';
+      msg.className = 'adminMsg good';
+    }
+  };
   function 수정화면갱신(){
     var 근무 = 오늘근무자();
     var el = document.getElementById('관리자_오늘');
     var g = 근무일자();
     if (el) el.innerHTML = '지금 근무: <b>' + 근무.name + '</b>'
-      + '<br><span style="font-size:12px;color:var(--muted);font-weight:600">근무일 ' + g.s + ' 기준 · 매일 오전 9시 교대</span>';
+      + '<br><span style="font-size:12px;color:var(--muted);font-weight:600">근무일 ' + g.s + ' 기준</span>';
     예외목록렌더();
-  }
-  function 예외저장(){
-    var 날짜 = document.getElementById('관리자_날짜').value;
-    var msg = document.getElementById('관리자_수정msg');
-    msg.className = 'adminMsg';
-    if (!날짜) { msg.textContent = '날짜를 선택하세요'; return; }
-    if (픽선택 !== 'kim' && 픽선택 !== 'lee') { msg.textContent = '근무자를 선택하세요'; return; }
-    var map = 로컬예외로드();
-    map[날짜] = 픽선택;
-    로컬예외저장(map);
-    msg.textContent = 날짜 + ' → ' + (픽선택==='kim'?'김종대':'이기동') + ' 기사 저장됨';
-    msg.className = 'adminMsg good';
-    수정화면갱신();
-    상태갱신();          // 16카트 전화대상·(일하는중)/(안하는중) 즉시 반영
   }
   window.예외삭제 = function(날짜){
     var map = 로컬예외로드();
     delete map[날짜];
     로컬예외저장(map);
     수정화면갱신();
+    달력그리드렌더();
+    if (날짜 === 선택날짜) 선택박스표시(선택날짜);
     상태갱신();
   };
   function 예외목록렌더(){
