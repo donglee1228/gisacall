@@ -256,14 +256,32 @@
   .heroArt{width:min(78vw,300px);height:auto;display:block;filter:drop-shadow(0 10px 24px rgba(0,0,0,.5));}
   .heroTitle{font-size:30px;font-weight:900;letter-spacing:.1em;color:var(--gold2);
     text-shadow:0 2px 12px rgba(0,0,0,.6);}
+  /* 한 화면에 다 담기 위해 로고는 작게 */
+  .heroCompact{margin-bottom:2px;}
+  .heroCompact .heroArt{width:min(40vw,140px);}
+  .heroCompact .heroTitle{font-size:22px;}
+
+  /* 상단 멘트 배너 */
+  .notice{
+    width:100%;text-align:center;
+    background:linear-gradient(160deg,#33261a 0%,#241b12 100%);
+    border:2px solid rgba(230,190,63,.7);border-radius:18px;
+    padding:16px 16px;
+    box-shadow:0 10px 26px rgba(0,0,0,.4), inset 0 1px 0 rgba(255,255,255,.06);
+  }
+  .noticeMain{font-size:21px;font-weight:900;color:var(--text);line-height:1.45;letter-spacing:.01em;}
+  .noticeMain .cartBig{font-size:33px;color:var(--gold2);}
+  .noticeSub{margin-top:8px;font-size:14px;font-weight:700;color:var(--muted);}
+  /* 첫화면 인라인 기사 카드 영역 제목 */
+  .frontListTitle{color:var(--gold2);font-size:17px;font-weight:800;letter-spacing:.03em;text-align:center;margin-top:2px;}
 </style>
 
 <div class="wrap">
 
-  <!-- 1) 성별 선택 화면 -->
-  <section id="화면_성별" class="screen active">
+  <!-- 첫화면 = 물량 콜 화면 (성별 선택 단계 제거 → 앱 열자마자 바로 승부) -->
+  <section id="화면_물량" class="screen active">
     <!-- 히어로: 자체 제작 SVG(트럭+콜) — 저작권 안전, 화면에서 이미지 바로 확인 가능 -->
-    <div class="hero">
+    <div class="hero heroCompact">
       <svg class="heroArt" viewBox="0 0 240 150" role="img" aria-label="기사콜 트럭 로고" xmlns="http://www.w3.org/2000/svg">
         <defs>
           <linearGradient id="gCard" x1="0" y1="0" x2="0" y2="1">
@@ -289,62 +307,36 @@
       </svg>
       <div class="heroTitle">기사콜</div>
     </div>
-    <div class="genderRow">
-      <button class="btn man" onclick="성별선택('남')">
-        <span class="ico">♂</span>
-        <span>저는 남자 입니다</span>
-      </button>
-      <button class="btn woman" onclick="성별선택('여')">
-        <span class="ico">♀</span>
-        <span>저는 여자입니다</span>
-      </button>
+    <!-- 상단 멘트 -->
+    <div class="notice">
+      <div class="noticeMain">안녕하세요 세탁기사입니다<br><span class="cartBig">16카트</span> 넘어요!</div>
+      <div class="noticeSub">※ 15카트는 전화 안 하셔도 돼요</div>
     </div>
-  </section>
 
-  <!-- 2) 물량 패널 화면 -->
-  <section id="화면_물량" class="screen">
-    <button class="callBtn" onclick="물량알림()">
-      기사님 오늘 <span class="k">15카트</span>넘어요!
-    </button>
-    <button class="link" onclick="처음으로()">← 다시 선택</button>
-  </section>
-</div>
+    <!-- 일하는 기사에게 바로 전화 (뒷장 카드를 첫화면으로 이동) -->
+    <div class="frontListTitle">📞 일하는 기사님께 바로 전화</div>
+    <div class="driverRow">
+      <div class="driverCard">
+        <div class="name">이기동 기사<br>(뚱땡이)</div>
+        <div class="num">010-3805-9275</div>
+        <div class="status" id="상태_이기동">&nbsp;</div>
+        <a class="telBtn" href="tel:01038059275"><span class="ico">📞</span>전화</a>
+      </div>
+      <div class="driverCard">
+        <div class="name">김종대 기사</div>
+        <div class="num">010-3383-5808</div>
+        <div class="status" id="상태_김종대">&nbsp;</div>
+        <a class="telBtn" href="tel:01033835808"><span class="ico">📞</span>전화</a>
+      </div>
+    </div>
 
-<!-- 알림 오버레이 -->
-<div id="알림" class="alert" onclick="알림닫기(event)">
-  <div class="alertCard">
-    <div class="siren">🚨</div>
-    <h2>물량 폭주!</h2>
-    <div class="cart">15카트 ↑</div>
-    <div class="calling" id="전화중"></div>
-    <div class="thanks">감사합니다 오늘 빨리가겠습니다!</div>
-    <button class="closeBtn" onclick="알림닫기()">확인</button>
+    <!-- 사장님용 근무표 수정 패널 (잠금) -->
+    <div class="adminWrap">
+      <button class="adminOpen" onclick="관리자열기()">🔒 근무표 수정 (사장님)</button>
+    </div>
+
     <button class="exitBtn" onclick="앱종료()">종료하기</button>
-
-    <!-- 기사 전화하기 목록 (오늘 근무 상태 자동 표시) -->
-    <div class="callList">
-      <div class="listTitle">📞 기사님께 전화하기</div>
-      <div class="driverRow">
-        <div class="driverCard">
-          <div class="name">이기동 기사<br>(뚱땡이)</div>
-          <div class="num">010-3805-9275</div>
-          <div class="status" id="상태_이기동">&nbsp;</div>
-          <a class="telBtn" href="tel:01038059275"><span class="ico">📞</span>전화</a>
-        </div>
-        <div class="driverCard">
-          <div class="name">김종대 기사</div>
-          <div class="num">010-3383-5808</div>
-          <div class="status" id="상태_김종대">&nbsp;</div>
-          <a class="telBtn" href="tel:01033835808"><span class="ico">📞</span>전화</a>
-        </div>
-      </div>
-
-      <!-- 사장님용 근무표 수정 패널 (잠금) -->
-      <div class="adminWrap">
-        <button class="adminOpen" onclick="관리자열기()">🔒 근무표 수정 (사장님)</button>
-      </div>
-    </div>
-  </div>
+  </section>
 </div>
 
 <!-- 근무표 수정 오버레이 -->
@@ -394,18 +386,6 @@
 </div>
 
 <script>
-  var 선택성별 = "";
-  function 보이기(id){
-    document.querySelectorAll('.screen').forEach(function(s){s.classList.remove('active');});
-    document.getElementById(id).classList.add('active');
-  }
-  function 성별선택(g){
-    선택성별 = g || "";
-    보이기('화면_물량');
-  }
-  function 처음으로(){
-    보이기('화면_성별');
-  }
   // ===== 근무 예외표: 격일제와 다르게 지정할 날짜만 여기에 추가하세요 =====
   // ★ 특정 날 근무자를 바꾸려면 아래 한 줄만 고치면 됩니다(모든 폰에 동일 반영).
   //   'YYYY-MM-DD'(한국날짜) : 'kim'(김종대) 또는 'lee'(이기동)
@@ -463,33 +443,6 @@
     김.textContent = 이근무 ? '(안하는중)' : '(일하는중)';
     이.className = 'status ' + (이근무 ? 'on' : 'off');
     김.className = 'status ' + (이근무 ? 'off' : 'on');
-  }
-  // 오늘 근무자에게 전화 걸기 (tel: 다이얼러 — 검색창 이동 문제 없음)
-  function 근무자전화(){
-    var 근무 = 오늘근무자();
-    var 표시 = document.getElementById('전화중');
-    if (표시) 표시.textContent = '📞 ' + 근무.name + '님께 전화 거는 중…';
-    try {
-      var a = document.createElement('a');
-      a.href = 'tel:' + 근무.tel;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-    } catch(e) {
-      location.href = 'tel:' + 근무.tel;
-    }
-    console.log('[기사콜] 오늘 근무자 전화:', 근무.name, 근무.tel);
-  }
-  function 물량알림(){
-    상태갱신();
-    근무자전화();                    // ① 오늘 근무 중인 기사에게 tel: 전화
-    var a = document.getElementById('알림');
-    a.classList.add('show');         // ② 기존 알림 오버레이/감사멘트 유지
-    if (navigator.vibrate) { try { navigator.vibrate([120,60,120]); } catch(e){} }
-  }
-  function 알림닫기(e){
-    if (e && e.target && e.target.id !== '알림' && !e.target.classList.contains('closeBtn')) return;
-    document.getElementById('알림').classList.remove('show');
   }
   function 앱종료(){
     // 설치형(홈 화면 추가) PWA 감지
@@ -560,7 +513,7 @@
     msg.textContent = 날짜 + ' → ' + (픽선택==='kim'?'김종대':'이기동') + ' 기사 저장됨';
     msg.className = 'adminMsg good';
     수정화면갱신();
-    상태갱신();          // 15카트 전화대상·(일하는중)/(안하는중) 즉시 반영
+    상태갱신();          // 16카트 전화대상·(일하는중)/(안하는중) 즉시 반영
   }
   window.예외삭제 = function(날짜){
     var map = 로컬예외로드();
