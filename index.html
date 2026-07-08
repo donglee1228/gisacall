@@ -274,6 +274,8 @@
   .noticeSub{margin-top:8px;font-size:14px;font-weight:700;color:var(--muted);}
   /* 첫화면 인라인 기사 카드 영역 제목 */
   .frontListTitle{color:var(--gold2);font-size:17px;font-weight:800;letter-spacing:.03em;text-align:center;margin-top:2px;}
+  .shiftNote{text-align:center;font-size:12.5px;color:var(--muted);font-weight:700;margin-top:-6px;}
+  .shiftNote b{color:var(--gold2);}
 </style>
 
 <div class="wrap">
@@ -315,6 +317,7 @@
 
     <!-- 일하는 기사에게 바로 전화 (뒷장 카드를 첫화면으로 이동) -->
     <div class="frontListTitle">📞 일하는 기사님께 바로 전화</div>
+    <div class="shiftNote">근무자는 매일 <b>오전 9시</b>에 교대돼요</div>
     <div class="driverRow">
       <div class="driverCard">
         <div class="name">이기동 기사<br>(뚱땡이)</div>
@@ -403,6 +406,23 @@
     return { y:y, m:m, d:d, s:s, dateObj:new Date(y, m, d) };
   }
 
+  // ===== 근무 기준일 (★매일 오전 9시 교대) =====
+  // 근무자 '일하는중'은 매일 오전 9시에 다음 사람으로 넘어감. (자정 아님)
+  //  · 00:00 ~ 08:59  : 아직 '어제 근무자'가 일하는중으로 유지 → 새벽에 미리 다음 기사에게 전화하는 일 방지
+  //  · 09:00 이후      : '오늘 근무자'로 전환
+  // 원리: KST 벽시계에서 9시간을 빼면(=근무일), 날짜가 넘어가는 순간이 오전 9시가 됨.
+  // 앱을 켜두면 60초마다 재계산되어 오전 9시에 자동으로 전환됨.
+  function 근무일자(){
+    var now = new Date();
+    var utc = now.getTime() + now.getTimezoneOffset() * 60000; // 기기 로컬 → UTC 기준 epoch
+    var kstMs = utc + 9 * 3600000;                             // UTC → KST 벽시계
+    var 근무Ms = kstMs - 9 * 3600000;                          // 오전 9시 교대 → 9시간 당김(=근무일)
+    var k = new Date(근무Ms);
+    var y = k.getFullYear(), m = k.getMonth(), d = k.getDate();
+    var s = y + '-' + String(m+1).padStart(2,'0') + '-' + String(d).padStart(2,'0');
+    return { y:y, m:m, d:d, s:s, dateObj:new Date(y, m, d) };
+  }
+
   // ===== 이 폰 전용 예외(localStorage) — 사장님 근무표 수정 패널이 저장하는 곳 =====
   // ※ 근무표 "설정" 저장에만 사용(버튼 누름 이력 저장 아님). 이 폰에서만 반영됨.
   var LS_예외키 = 'gisacall_예외근무';
@@ -429,7 +449,7 @@
       : { key:'lee', name:'이기동 기사(뚱땡이)', tel:'01038059275' };
   }
   function 오늘근무자(){
-    var k = kst날짜();
+    var k = 근무일자();   // ★오전 9시 교대 기준 근무일
     return who객체(근무자판정(k.s, k.dateObj));
   }
   // ===== 전화 카드 아래 (일하는중)/(안하는중) 상태 자동 표시 =====
@@ -497,8 +517,9 @@
   function 수정화면갱신(){
     var 근무 = 오늘근무자();
     var el = document.getElementById('관리자_오늘');
-    var k = kst날짜();
-    if (el) el.innerHTML = '오늘(' + k.s + ', 한국시간) 근무: <b>' + 근무.name + '</b>';
+    var g = 근무일자();
+    if (el) el.innerHTML = '지금 근무: <b>' + 근무.name + '</b>'
+      + '<br><span style="font-size:12px;color:var(--muted);font-weight:600">근무일 ' + g.s + ' 기준 · 매일 오전 9시 교대</span>';
     예외목록렌더();
   }
   function 예외저장(){
@@ -537,7 +558,7 @@
     box.innerHTML = html;
   }
 
-  // 격일제 상태 자동 전환: 최초 + 60초마다 + 다시 포커스 시 재계산(자정 넘김·앱 상시 켜둠 대비)
+  // 격일제 상태 자동 전환: 최초 + 60초마다 + 다시 포커스 시 재계산(★오전 9시 교대·앱 상시 켜둠 대비)
   상태갱신();
   setInterval(상태갱신, 60000);
   document.addEventListener('visibilitychange', function(){
